@@ -24,6 +24,12 @@ export type Project = {
   summary: string;
   discipline: readonly string[];
   href?: string;
+  /**
+   * Optional screenshot, relative to /public (e.g. "/work/orixen-cover.png").
+   * Resolved through `coverFor()` at build time, so a path that has no file
+   * behind it yet falls back to the generated colour field instead of 404ing.
+   */
+  cover?: string;
   /** Two hues that drive the case study's gradient and the 3D scene tint. */
   palette: readonly [string, string];
   challenge: string;
@@ -44,8 +50,9 @@ export const projects: readonly Project[] = [
     summary:
       "Founded a digital-services brand and built everything it needed to look credible on day one — identity, website, social presence, service structure and an outreach system.",
     discipline: ["Brand", "Web", "Business"],
+    cover: "/work/orixen-cover.png",
     href: "https://orixendigital.vercel.app/",
-    palette: ["#FF5C2B", "#FFB35C"],
+    palette: ["#2F6BFF", "#7FA8FF"],
     challenge:
       "Create a digital-services brand capable of presenting web development, design, content and technical services professionally — without the track record an established agency would lean on.",
     role: ["Founder", "Developer", "Designer"],
@@ -57,12 +64,12 @@ export const projects: readonly Project[] = [
       "Marketing creatives",
       "Outreach system",
     ],
-    tools: ["HTML", "CSS", "JavaScript", "Vercel", "Figma", "Canva", "AI tools"],
+    tools: ["HTML", "CSS", "JavaScript", "3D / WebGL", "Vercel", "Figma", "Canva", "AI tools"],
     outcome: {
       statement:
         "A complete digital-services brand with its own identity, online presence and service offering — shipped, live, and able to take a client from first contact to delivery.",
       metrics: [
-        { value: "6", label: "Service lines defined" },
+        { value: "6", label: "Service lines shipped" },
         { value: "1", label: "Brand built end to end" },
         { value: "Live", label: "Deployed on Vercel" },
       ],
@@ -77,8 +84,13 @@ export const projects: readonly Project[] = [
       {
         title: "Website",
         body:
-          "A hand-built site rather than a template, so the service structure and the copy could be argued over rather than filled in. Deployed on Vercel so updates ship the moment they are written.",
-        items: ["Hand-written HTML, CSS and JavaScript", "Service architecture", "Deployed on Vercel"],
+          "Built rather than assembled from a template. The landing frame is a 3D hero over a starfield — the demo of the service, not a description of it — and the page runs About, Services, Showcase, FAQ and Contact so a prospect can self-qualify before they ever send a message. A service marquee runs under the fold so the full offering is visible without a click.",
+        items: [
+          "3D hero and motion system",
+          "About · Services · Showcase · FAQ · Contact",
+          "Service marquee",
+          "Deployed on Vercel",
+        ],
       },
       {
         title: "Social media",
@@ -89,8 +101,15 @@ export const projects: readonly Project[] = [
       {
         title: "Client work",
         body:
-          "Services span web development, design, content, QR menu solutions and automation concepts. Outreach runs on a structured system rather than hoping the right people find the site.",
-        items: ["Digital services", "QR menu solutions", "Automation concepts", "Client outreach"],
+          "Six service lines, each one something the brand can actually deliver rather than a list padded to look bigger. Outreach runs on a structured system instead of hoping the right people find the site.",
+        items: [
+          "Digital menus",
+          "Portfolios",
+          "Video edits",
+          "Tech support",
+          "Digital products",
+          "3D experiences",
+        ],
       },
     ],
   },
@@ -103,7 +122,7 @@ export const projects: readonly Project[] = [
     summary:
       "A student dashboard with AI assistance, authentication and Firebase sync — built to pull a scattered study workflow into one place that actually holds state.",
     discipline: ["Product", "Web App", "AI"],
-    palette: ["#3F5BC4", "#6FA8C8"],
+    palette: ["#4B3FA8", "#7E6FD0"],
     challenge:
       "Studying happens across a dozen tools that do not talk to each other — notes here, deadlines there, resources somewhere else. The challenge was a single surface that stays in sync across devices without becoming another thing to maintain.",
     role: ["Developer", "Product designer"],
@@ -212,7 +231,7 @@ export const projects: readonly Project[] = [
     summary:
       "Logos, posters, social creatives, video edits and digital campaigns — the visual work that runs alongside everything else I build.",
     discipline: ["Brand", "Graphics", "Motion"],
-    palette: ["#7A4FB5", "#C4568F"],
+    palette: ["#8A3F6B", "#C4568F"],
     challenge:
       "Most of my technical projects needed visual identity before they needed users. Rather than outsource it, the creative work became its own practice — and the reason my products do not look like unstyled demos.",
     role: ["Designer", "Editor"],

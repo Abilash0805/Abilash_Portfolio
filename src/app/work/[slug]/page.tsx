@@ -8,6 +8,7 @@ import { CaseChapters } from "@/components/case/CaseChapters";
 import { ArrowUpRightIcon } from "@/components/icons";
 import { MaskLines, Rise, SplitChars } from "@/components/ui/SplitReveal";
 import { projectBySlug, projects } from "@/content/work";
+import { coverFor } from "@/lib/covers";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -29,6 +30,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
   const project = projectBySlug(slug);
   if (!project) notFound();
 
+  const withCover = { ...project, cover: coverFor(project.cover) };
   const order = projects.findIndex((p) => p.slug === project.slug);
   const next = projects[(order + 1) % projects.length];
 
@@ -37,7 +39,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
       <Nav />
 
       <main id="main">
-        <CaseHero project={project} />
+        <CaseHero project={withCover} />
 
         <section aria-labelledby="brief-title" className="shell py-24 sm:py-32">
           <h2 id="brief-title" className="sr-only">

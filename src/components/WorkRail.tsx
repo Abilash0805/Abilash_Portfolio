@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { projects } from "@/content/work";
+import type { Project } from "@/content/work";
 import { ArrowUpRightIcon } from "@/components/icons";
 import { Magnetic } from "@/components/ui/Magnetic";
 
@@ -16,7 +17,7 @@ import { Magnetic } from "@/components/ui/Magnetic";
  * Under reduced motion no ScrollTrigger is built and the same panels lay out
  * as a normal vertical stack -- the markup is identical either way.
  */
-export function WorkRail() {
+export function WorkRail({ projects }: { projects: readonly Project[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   // GSAP decides which panel is centred; Framer Motion moves the marker between
@@ -164,6 +165,15 @@ export function WorkRail() {
                     background: `radial-gradient(120% 120% at 18% 12%, ${project.palette[0]} 0%, ${project.palette[1]} 38%, #0b0b0f 78%)`,
                   }}
                 >
+                  {project.cover && (
+                    <Image
+                      src={project.cover}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 46rem, 100vw"
+                      className="object-cover object-top"
+                    />
+                  )}
                   <div
                     className="absolute inset-0"
                     style={{

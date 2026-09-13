@@ -21,6 +21,17 @@ npm run lint
 
 Case study pages are generated from `work.ts` — add an entry and `/work/<slug>` appears, with the project automatically in the work rail, the menu, and the next-project link.
 
+### Case study screenshots
+
+Drop a wide screenshot at `public/work/orixen-cover.png` and it appears behind
+the case study hero and in the work rail panel, automatically. Other projects:
+add a `cover: "/work/<name>.png"` field to the entry in `work.ts` and put the
+file in `public/work/`.
+
+A cover that is named but has no file behind it is ignored rather than shipping
+a broken image — `src/lib/covers.ts` checks at build time and falls back to the
+generated colour field. See `public/work/README.md`.
+
 ### Before you publish
 
 Two things in `src/content/` are placeholders:

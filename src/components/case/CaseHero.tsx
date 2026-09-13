@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
@@ -59,13 +60,36 @@ export function CaseHero({ project }: { project: Project }) {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden">
-      <div
-        aria-hidden="true"
-        className="case-field absolute inset-0 -z-10"
-        style={{
-          background: `radial-gradient(85% 70% at 20% 0%, ${project.palette[0]}55 0%, ${project.palette[1]}22 40%, transparent 72%)`,
-        }}
-      />
+      <div aria-hidden="true" className="case-field absolute inset-0 -z-10">
+        {project.cover && (
+          <>
+            <Image
+              src={project.cover}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-top opacity-40"
+            />
+            {/* The page has to stay legible over whatever the screenshot is
+                doing, so the image sits under a heavy scrim rather than
+                dictating the contrast of the type above it. */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to bottom, rgba(8,8,10,0.55) 0%, rgba(8,8,10,0.8) 55%, rgb(8,8,10) 100%)",
+              }}
+            />
+          </>
+        )}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(85% 70% at 20% 0%, ${project.palette[0]}55 0%, ${project.palette[1]}22 40%, transparent 72%)`,
+          }}
+        />
+      </div>
 
       <div className="shell flex min-h-[86svh] flex-col justify-end pb-16 pt-40">
         <Link
