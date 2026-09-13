@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Design tokens. Light is the base; dark overrides only the values.
+   --------------------------------------------------------------- */
+:root {
+  --background: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f4f4f2;
+  --foreground: #14141a;
+  --muted: #55555f;
+  --border: #e2e2df;
+  --accent: #5b3df5;
+  --accent-contrast: #ffffff;
+  --accent-soft: #ece8ff;
+  --ring: #5b3df5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0b0f;
+    --surface: #121218;
+    --surface-2: #17171f;
+    --foreground: #e9e9ee;
+    --muted: #a2a2ae;
+    --border: #26262f;
+    --accent: #8b72ff;
+    --accent-contrast: #0b0b0f;
+    --accent-soft: #1b1730;
+    --ring: #8b72ff;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  html {
+    /* Lenis drives scrolling; native smooth scroll would fight it. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visible focus on every interactive element (never remove the ring). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+}
+
+/* Lenis: it sets these while it owns the scroll position. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
