@@ -44,15 +44,20 @@ export function Approach() {
         });
 
         chapters.forEach((chapter, index) => {
-          const isFirst = index === 0;
-
-          if (!isFirst) {
-            tl.fromTo(
-              chapter,
-              { autoAlpha: 0, yPercent: 8 },
-              { autoAlpha: 1, yPercent: 0, ease: "none", duration: 1 },
+          if (index > 0) {
+            // Cut, not dissolve: the outgoing chapter is fully gone before the
+            // next one arrives. Overlapping two blocks of copy at 50% opacity
+            // just produces a paragraph nobody can read.
+            tl.to(
+              chapters[index - 1],
+              { autoAlpha: 0, yPercent: -6, ease: "power2.in", duration: 0.4 },
               index,
-            ).to(chapters[index - 1], { autoAlpha: 0, yPercent: -8, ease: "none", duration: 1 }, index);
+            ).fromTo(
+              chapter,
+              { autoAlpha: 0, yPercent: 6 },
+              { autoAlpha: 1, yPercent: 0, ease: "power2.out", duration: 0.4 },
+              index + 0.6,
+            );
           }
 
           tl.fromTo(
@@ -135,7 +140,7 @@ export function Approach() {
               >
                 <span
                   aria-hidden="true"
-                  className="block font-display text-[5rem] font-semibold leading-none text-ember/25 sm:text-[7rem]"
+                  className="block font-display text-[5rem] font-semibold leading-none text-ember/40 sm:text-[7rem]"
                 >
                   {chapter.index}
                 </span>

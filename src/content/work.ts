@@ -103,7 +103,7 @@ export const projects: readonly Project[] = [
     summary:
       "A student dashboard with AI assistance, authentication and Firebase sync — built to pull a scattered study workflow into one place that actually holds state.",
     discipline: ["Product", "Web App", "AI"],
-    palette: ["#5B7CFA", "#9BE8FF"],
+    palette: ["#3F5BC4", "#6FA8C8"],
     challenge:
       "Studying happens across a dozen tools that do not talk to each other — notes here, deadlines there, resources somewhere else. The challenge was a single surface that stays in sync across devices without becoming another thing to maintain.",
     role: ["Developer", "Product designer"],
@@ -161,7 +161,7 @@ export const projects: readonly Project[] = [
     summary:
       "Arduino, ESP32 and NodeMCU builds — sensor rigs, competition robots, and the debugging that happens when the code is right and the wiring is not.",
     discipline: ["Embedded", "Hardware", "Competition"],
-    palette: ["#3ED598", "#C8FF3D"],
+    palette: ["#2E8B6B", "#86A83C"],
     challenge:
       "Software fails politely. Hardware does not — a loose ground line looks exactly like a logic bug. These builds are where I learned to isolate a problem across two domains at once, under a competition clock.",
     role: ["Builder", "Embedded developer"],
@@ -212,7 +212,7 @@ export const projects: readonly Project[] = [
     summary:
       "Logos, posters, social creatives, video edits and digital campaigns — the visual work that runs alongside everything else I build.",
     discipline: ["Brand", "Graphics", "Motion"],
-    palette: ["#C15CFF", "#FF7BD5"],
+    palette: ["#7A4FB5", "#C4568F"],
     challenge:
       "Most of my technical projects needed visual identity before they needed users. Rather than outsource it, the creative work became its own practice — and the reason my products do not look like unstyled demos.",
     role: ["Designer", "Editor"],

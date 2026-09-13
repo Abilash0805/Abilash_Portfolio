@@ -168,7 +168,7 @@ export function WorkRail() {
                     className="absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to bottom, rgba(8,8,10,0.42) 0%, rgba(8,8,10,0.55) 45%, rgba(8,8,10,0.92) 100%)",
+                        "linear-gradient(to bottom, rgba(8,8,10,0.52) 0%, rgba(8,8,10,0.62) 45%, rgba(8,8,10,0.95) 100%)",
                     }}
                   />
                   <div
