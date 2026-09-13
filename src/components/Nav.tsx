@@ -1,173 +1,204 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { nav, site } from "@/content/site";
-import { CloseIcon, MenuIcon } from "@/components/icons";
-import { useSmoothScrollTo } from "@/components/SmoothScroll";
+import { projects } from "@/content/work";
+import { Magnetic } from "@/components/ui/Magnetic";
+
+/**
+ * Division of labour, deliberately:
+ *  - GSAP drives the scroll-reactive header (a continuous response to scroll).
+ *  - Framer Motion drives the menu, because mount/unmount of a component that
+ *    is conditionally rendered is exactly what AnimatePresence exists for --
+ *    GSAP would need the node kept in the tree to animate it out.
+ */
+
+const sheet: Variants = {
+  hidden: { clipPath: "inset(0% 0% 100% 0%)" },
+  visible: {
+    clipPath: "inset(0% 0% 0% 0%)",
+    transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], staggerChildren: 0.06, delayChildren: 0.25 },
+  },
+  exit: {
+    clipPath: "inset(0% 0% 100% 0%)",
+    transition: { duration: 0.5, ease: [0.76, 0, 0.24, 1], when: "afterChildren" },
+  },
+};
+
+const sheetItem: Variants = {
+  hidden: { y: "110%" },
+  visible: { y: "0%", transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+  exit: { y: "110%", transition: { duration: 0.3 } },
+};
 
 export function Nav() {
-  const scrollTo = useSmoothScrollTo();
-  const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState<string>("");
+  const headerRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const reduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // Hide going down, return coming up.
+  useGSAP(
+    () => {
+      const header = headerRef.current;
+      if (!header) return;
 
-  // Highlight the section currently occupying the middle of the viewport.
-  useEffect(() => {
-    const sections = nav
-      .map(({ href }) => document.querySelector<HTMLElement>(href))
-      .filter((el): el is HTMLElement => el !== null);
+      const mm = gsap.matchMedia();
+      mm.add(MOTION_OK, () => {
+        let last = window.scrollY;
+        const onScroll = () => {
+          if (open) return;
+          const y = window.scrollY;
+          gsap.to(header, {
+            yPercent: y > last && y > 160 ? -130 : 0,
+            duration: 0.5,
+            ease: "power3.out",
+            overwrite: true,
+          });
+          last = y;
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => {
+          window.removeEventListener("scroll", onScroll);
+          gsap.set(header, { yPercent: 0 });
+        };
+      });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(`#${visible.target.id}`);
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.25, 0.5, 1] },
-    );
+      return () => mm.revert();
+    },
+    { scope: headerRef, dependencies: [open] },
+  );
 
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, []);
-
-  // Close the mobile sheet on Escape, and don't leave the page scrollable behind it.
   useEffect(() => {
     if (!open) return;
+
+    closeRef.current?.focus();
+    const html = document.documentElement;
+    html.style.overflow = "hidden";
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      html.style.overflow = "";
+    };
   }, [open]);
 
-  const go = (href: string) => {
-    setOpen(false);
-    scrollTo(href);
-    // Keep the URL shareable without letting the browser jump.
-    window.history.replaceState(null, "", href);
-  };
-
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        scrolled
-          ? "border-b border-border bg-background/80 backdrop-blur-md"
-          : "border-b border-transparent"
-      }`}
-    >
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-        <button
-          type="button"
-          onClick={() => go("#top")}
-          className="-mx-2 rounded px-2 py-1 font-mono text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-accent"
-        >
-          {site.name}
-          <span className="text-accent">.</span>
-        </button>
-
-        <nav aria-label="Sections" className="hidden md:block">
-          <ul className="flex items-center gap-1">
-            {nav.map((item) => {
-              const isActive = active === item.href;
-              return (
-                <li key={item.href}>
-                  <button
-                    type="button"
-                    onClick={() => go(item.href)}
-                    aria-current={isActive ? "true" : undefined}
-                    className={`relative rounded-full px-4 py-2 text-sm transition-colors ${
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted hover:text-foreground"
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        className="absolute inset-0 -z-10 rounded-full bg-surface-2"
-                        transition={
-                          reduceMotion
-                            ? { duration: 0 }
-                            : { type: "spring", stiffness: 380, damping: 32 }
-                        }
-                      />
-                    )}
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <a
-            href={`mailto:${site.email}`}
-            className="hidden rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90 sm:inline-block"
+    <>
+      <header ref={headerRef} className="fixed inset-x-0 top-0 z-[80] mix-blend-difference">
+        <div className="shell flex h-20 items-center justify-between">
+          <Link
+            href="/"
+            className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-ivory"
           >
-            Get in touch
-          </a>
+            {site.shortName}
+            <span className="text-ember">.</span>
+          </Link>
+
+          <nav aria-label="Primary" className="hidden items-center gap-9 md:flex">
+            {nav.map((item) => (
+              <Magnetic key={item.href} strength={0.28}>
+                <Link
+                  href={item.href}
+                  className="group relative block py-2 text-sm text-ivory transition-opacity hover:opacity-80"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-ivory transition-[width] duration-300 group-hover:w-full" />
+                </Link>
+              </Magnetic>
+            ))}
+          </nav>
 
           <button
             type="button"
-            onClick={() => setOpen((value) => !value)}
+            onClick={() => setOpen(true)}
             aria-expanded={open}
-            aria-controls="mobile-menu"
-            aria-label={open ? "Close menu" : "Open menu"}
-            className="grid size-11 place-items-center rounded-full text-foreground transition-colors hover:bg-surface-2 md:hidden"
+            aria-controls="menu-overlay"
+            className="flex min-h-11 items-center gap-3 text-sm uppercase tracking-[0.2em] text-ivory md:hidden"
           >
-            {open ? <CloseIcon /> : <MenuIcon />}
+            Menu
+            <span className="flex flex-col gap-1">
+              <span className="block h-px w-6 bg-ivory" />
+              <span className="block h-px w-6 bg-ivory" />
+            </span>
           </button>
         </div>
-      </div>
+      </header>
 
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {open && (
           <motion.div
-            id="mobile-menu"
-            key="mobile-menu"
-            initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-b border-border bg-background md:hidden"
+            id="menu-overlay"
+            key="menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+            variants={sheet}
+            initial={reduceMotion ? false : "hidden"}
+            animate="visible"
+            exit={reduceMotion ? { opacity: 0 } : "exit"}
+            className="fixed inset-0 z-[85] flex flex-col justify-between bg-ink px-6 py-6 sm:px-10 sm:py-8"
           >
-            <nav aria-label="Sections" className="px-5 pb-4 sm:px-8">
-              <ul className="flex flex-col">
+            <div className="flex items-center justify-between">
+              <span className="eyebrow">Menu</span>
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex min-h-11 items-center gap-3 text-sm uppercase tracking-[0.2em] text-ivory"
+              >
+                Close
+                <span className="relative block size-4">
+                  <span className="absolute inset-x-0 top-1/2 block h-px rotate-45 bg-ivory" />
+                  <span className="absolute inset-x-0 top-1/2 block h-px -rotate-45 bg-ivory" />
+                </span>
+              </button>
+            </div>
+
+            <nav aria-label="Menu">
+              <ul className="flex flex-col gap-1">
                 {nav.map((item) => (
-                  <li key={item.href}>
-                    <button
-                      type="button"
-                      onClick={() => go(item.href)}
-                      className="flex min-h-12 w-full items-center rounded-lg px-2 text-left text-base text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
-                    >
-                      {item.label}
-                    </button>
+                  <li key={item.href} className="line-mask">
+                    <motion.span variants={reduceMotion ? undefined : sheetItem} className="block">
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className="block font-display display-lg font-semibold text-ivory transition-colors hover:text-ember"
+                      >
+                        {item.label}
+                      </Link>
+                    </motion.span>
                   </li>
                 ))}
-                <li className="pt-2">
-                  <a
-                    href={`mailto:${site.email}`}
-                    className="flex min-h-12 items-center justify-center rounded-full bg-accent px-4 text-sm font-medium text-accent-contrast"
-                  >
-                    Get in touch
-                  </a>
-                </li>
               </ul>
             </nav>
+
+            <div className="hairline pt-5">
+              <p className="eyebrow mb-3">Selected work</p>
+              <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                {projects.map((project) => (
+                  <li key={project.slug}>
+                    <Link
+                      href={`/work/${project.slug}`}
+                      onClick={() => setOpen(false)}
+                      className="text-sm text-ivory-dim transition-colors hover:text-ivory"
+                    >
+                      <span className="text-ivory-faint">{project.index}</span> {project.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }

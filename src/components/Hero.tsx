@@ -1,130 +1,154 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import dynamic from "next/dynamic";
+import { useRef } from "react";
+import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { site } from "@/content/site";
-import { ArrowDownIcon, socialIcons, type SocialIconName } from "@/components/icons";
-import { useSmoothScrollTo } from "@/components/SmoothScroll";
+import { scrollState } from "@/lib/scroll-store";
+import { useSmoothScrollTo } from "@/components/providers/SmoothScroll";
+import { Magnetic } from "@/components/ui/Magnetic";
 
-const container: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 22 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};
+// WebGL never runs on the server, and its bundle should not sit in the
+// critical path either.
+const Scene = dynamic(() => import("@/components/three/Scene").then((m) => m.Scene), {
+  ssr: false,
+});
 
 export function Hero() {
-  const reduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
   const scrollTo = useSmoothScrollTo();
 
-  const MotionSection = reduceMotion ? "div" : motion.div;
-  const animation = reduceMotion
-    ? {}
-    : { variants: container, initial: "hidden", animate: "visible" };
-  const childAnimation = reduceMotion ? {} : { variants: item };
+  useGSAP(
+    () => {
+      const section = sectionRef.current;
+      if (!section) return;
+
+      // Feed the 3D scene regardless of motion preference -- with reduced
+      // motion the Canvas never mounts, so this simply goes unread.
+      const progress = ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "bottom top",
+        onUpdate: (self) => {
+          scrollState.heroProgress = self.progress;
+        },
+      });
+
+      const mm = gsap.matchMedia();
+
+      mm.add(MOTION_OK, () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1,
+          },
+        });
+
+        // Entrance, timed to land as the preloader curtain lifts.
+        gsap.from(".hero-line", {
+          yPercent: 115,
+          duration: 1.2,
+          ease: "expo.out",
+          stagger: 0.08,
+          delay: 2.15,
+        });
+        gsap.from(".hero-meta", {
+          y: 24,
+          opacity: 0,
+          duration: 1,
+          ease: "expo.out",
+          stagger: 0.08,
+          delay: 2.5,
+        });
+
+        // The type recedes as the object takes the frame.
+        tl.to(".hero-type", { yPercent: -18, opacity: 0, ease: "none" }, 0)
+          .to(".hero-cue", { opacity: 0, duration: 0.2, ease: "none" }, 0)
+          .to(".hero-vignette", { opacity: 1, ease: "none" }, 0);
+
+        return () => {
+          tl.scrollTrigger?.kill();
+          tl.kill();
+        };
+      });
+
+      return () => {
+        progress.kill();
+        mm.revert();
+      };
+    },
+    { scope: sectionRef },
+  );
 
   return (
-    <section
-      id="top"
-      aria-labelledby="hero-title"
-      className="relative flex min-h-[100svh] items-center overflow-hidden"
-    >
-      {/* Decorative background wash -- purely presentational. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(60% 50% at 50% 0%, var(--accent-soft) 0%, transparent 70%)",
-        }}
-      />
+    <section ref={sectionRef} id="top" className="relative h-svh motion-safe:h-[180svh]">
+      <div className="sticky top-0 flex h-svh flex-col justify-between overflow-hidden">
+        {/* CSS composition that stands in for the WebGL layer when there is no
+            GPU, or when the visitor asked for reduced motion. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-20"
+          style={{
+            background:
+              "radial-gradient(52% 42% at 50% 46%, rgba(255,92,43,0.22) 0%, rgba(110,127,243,0.10) 42%, transparent 72%)",
+          }}
+        />
 
-      <MotionSection
-        {...animation}
-        className="mx-auto w-full max-w-6xl px-5 pt-28 pb-20 sm:px-8"
-      >
-        <motion.p
-          {...childAnimation}
-          className="font-mono text-xs uppercase tracking-[0.22em] text-accent"
-        >
-          {site.role} &middot; {site.location}
-        </motion.p>
+        <div aria-hidden="true" className="absolute inset-0 -z-10">
+          <Scene />
+        </div>
 
-        <motion.h1
-          {...childAnimation}
-          id="hero-title"
-          className="mt-6 max-w-4xl text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
-        >
-          Hi, I&rsquo;m {site.name}. I build the web&rsquo;s
-          <span className="text-accent"> quieter details</span>.
-        </motion.h1>
+        <div
+          aria-hidden="true"
+          className="hero-vignette pointer-events-none absolute inset-0 opacity-0"
+          style={{
+            background:
+              "radial-gradient(70% 60% at 50% 50%, transparent 30%, rgba(8,8,10,0.85) 100%)",
+          }}
+        />
 
-        <motion.p
-          {...childAnimation}
-          className="mt-7 max-w-2xl text-lg leading-relaxed text-muted"
-        >
-          {site.tagline}
-        </motion.p>
+        <div className="shell hero-type relative flex flex-1 flex-col justify-end pb-[7vh] pt-28">
+          <p className="hero-meta eyebrow mb-6 sm:mb-8">
+            {site.roles.join(" · ")}
+          </p>
 
-        <motion.div {...childAnimation} className="mt-10 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => scrollTo("#work")}
-            className="inline-flex min-h-12 items-center rounded-full bg-accent px-6 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90"
-          >
-            View my work
-          </button>
-          <a
-            href={`mailto:${site.email}`}
-            className="inline-flex min-h-12 items-center rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:bg-surface-2"
-          >
-            Email me
-          </a>
-        </motion.div>
+          <h1 className="display-xl font-display font-semibold uppercase leading-[0.85] text-ivory">
+            <span className="line-mask">
+              <span className="hero-line block">
+                Abilash <span className="text-ember">V</span>
+              </span>
+            </span>
+          </h1>
 
-        <motion.ul {...childAnimation} className="mt-12 flex items-center gap-2">
-          {site.socials.map((social) => {
-            const Icon = socialIcons[social.icon as SocialIconName];
-            return (
-              <li key={social.label}>
-                <a
-                  href={social.href}
-                  aria-label={social.label}
-                  target={social.href.startsWith("http") ? "_blank" : undefined}
-                  rel={social.href.startsWith("http") ? "noreferrer noopener" : undefined}
-                  className="grid size-11 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent hover:text-accent"
-                >
-                  <Icon />
-                </a>
-              </li>
-            );
-          })}
-        </motion.ul>
-      </MotionSection>
+          <div className="hero-meta mt-8 flex flex-col gap-6 border-t border-ink-hair pt-6 sm:mt-12 sm:flex-row sm:items-end sm:justify-between">
+            <p className="max-w-md text-base leading-relaxed text-ivory-dim sm:text-lg">
+              {site.tagline}
+            </p>
 
-      <button
-        type="button"
-        onClick={() => scrollTo("#about")}
-        className="absolute inset-x-0 bottom-6 mx-auto grid size-11 place-items-center rounded-full text-muted transition-colors hover:text-foreground"
-        aria-label="Scroll to About"
-      >
-        {reduceMotion ? (
-          <ArrowDownIcon />
-        ) : (
-          <motion.span
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ArrowDownIcon />
-          </motion.span>
-        )}
-      </button>
+            <Magnetic strength={0.3}>
+              <button
+                type="button"
+                onClick={() => scrollTo("#work")}
+                className="group flex min-h-12 shrink-0 items-center gap-4 text-sm uppercase tracking-[0.2em] text-ivory"
+              >
+                Selected work
+                <span className="relative block h-px w-14 bg-ivory-faint">
+                  <span className="absolute inset-y-0 left-0 w-0 bg-ember transition-[width] duration-500 group-hover:w-full" />
+                </span>
+              </button>
+            </Magnetic>
+          </div>
+        </div>
+
+        <div className="hero-cue shell pb-6">
+          <div className="flex items-center justify-between text-[0.6875rem] uppercase tracking-[0.28em] text-ivory-faint">
+            <span>Scroll</span>
+            <span>{site.location}</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

@@ -1,78 +1,152 @@
 @import "tailwindcss";
 
-/* ---------------------------------------------------------------
-   Design tokens. Light is the base; dark overrides only the values.
-   --------------------------------------------------------------- */
-:root {
-  --background: #fafaf9;
-  --surface: #ffffff;
-  --surface-2: #f4f4f2;
-  --foreground: #14141a;
-  --muted: #55555f;
-  --border: #e2e2df;
-  --accent: #5b3df5;
-  --accent-contrast: #ffffff;
-  --accent-soft: #ece8ff;
-  --ring: #5b3df5;
-}
+/* ---------------------------------------------------------------------------
+   Abilash V -- cinematic dark system.
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b0b0f;
-    --surface: #121218;
-    --surface-2: #17171f;
-    --foreground: #e9e9ee;
-    --muted: #a2a2ae;
-    --border: #26262f;
-    --accent: #8b72ff;
-    --accent-contrast: #0b0b0f;
-    --accent-soft: #1b1730;
-    --ring: #8b72ff;
-  }
+   This design commits to a single dark look on purpose: the site is a film,
+   not a document. `color-scheme: dark` tells the browser so that scrollbars
+   and form controls match instead of flashing white.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  --ink: #08080a;
+  --ink-raised: #0e0e12;
+  --ink-hair: #1b1b21;
+  --ivory: #edeae3;
+  --ivory-dim: #9d9a93;
+  /* 5.58:1 on --ink. The eyebrow labels set in this tone are 11px, so they
+     need the full 4.5:1 for normal text, not the 3:1 large-text allowance. */
+  --ivory-faint: #8a877f;
+  --ember: #ff5c2b;
+  --ember-soft: #ff8b5c;
+  --cool: #6e7ff3;
+
+  --shell: min(100% - 2.5rem, 84rem);
+  --hair: 1px solid var(--ink-hair);
+
+  /* Film grain, generated rather than shipped as a bitmap. */
+  --grain-src: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
-  --color-accent: var(--accent);
-  --color-accent-contrast: var(--accent-contrast);
-  --color-accent-soft: var(--accent-soft);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-ink-raised: var(--ink-raised);
+  --color-ink-hair: var(--ink-hair);
+  --color-ivory: var(--ivory);
+  --color-ivory-dim: var(--ivory-dim);
+  --color-ivory-faint: var(--ivory-faint);
+  --color-ember: var(--ember);
+  --color-ember-soft: var(--ember-soft);
+  --color-cool: var(--cool);
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-grotesk);
 }
 
 @layer base {
   html {
-    /* Lenis drives scrolling; native smooth scroll would fight it. */
+    /* Lenis owns the scroll position; native smooth scrolling fights it. */
     scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background: var(--background);
-    color: var(--foreground);
+    background: var(--ink);
+    color: var(--ivory);
     font-family: var(--font-sans), system-ui, sans-serif;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
   }
 
-  /* Visible focus on every interactive element (never remove the ring). */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+
   :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 3px;
-    border-radius: 4px;
+    outline: 2px solid var(--ember);
+    outline-offset: 4px;
+    border-radius: 2px;
   }
 
   ::selection {
-    background: var(--accent);
-    color: var(--accent-contrast);
+    background: var(--ember);
+    color: var(--ink);
+  }
+
+  img,
+  canvas {
+    max-width: 100%;
   }
 }
 
-/* Lenis: it sets these while it owns the scroll position. */
+@layer components {
+  .shell {
+    width: var(--shell);
+    margin-inline: auto;
+  }
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ivory-faint);
+  }
+
+  /* Display sizes clamp instead of stepping, so nothing snaps at a breakpoint. */
+  .display-xl {
+    font-size: clamp(2.75rem, 11vw, 10.5rem);
+  }
+
+  .display-lg {
+    font-size: clamp(2.25rem, 7vw, 6rem);
+  }
+
+  .display-md {
+    font-size: clamp(1.75rem, 4vw, 3.25rem);
+  }
+
+  /* One line of a masked reveal: the child is translated up from behind this. */
+  .line-mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+
+  .hairline {
+    border-top: var(--hair);
+  }
+
+  /* Chapters stack as ordinary blocks by default. They only share a single
+     grid cell where the cross-fade timeline is actually built -- wide enough
+     to pin, and motion allowed. Anywhere else they would overlap unreadably. */
+  .chapter-stack {
+    display: grid;
+    gap: 4rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    .chapter-stack {
+      gap: 0;
+      align-content: center;
+      min-height: 20rem;
+    }
+
+    .chapter-stack > .chapter {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  }
+}
+
+/* Lenis-owned scroll. */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -86,16 +160,63 @@ html.lenis body {
   overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/* 35mm grain. Pure decoration, sits above everything, never intercepts input. */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: var(--grain-src);
+  background-size: 180px 180px;
+  will-change: transform;
+  animation: grain-drift 0.8s steps(4) infinite;
+}
 
+@keyframes grain-drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(-1%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion: not "faster animation" -- no animation. Anything that GSAP
+   would have revealed is rendered in its final state instead.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .grain {
+    animation: none;
+  }
+
+  [data-reveal],
+  [data-reveal] * {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}
+
+/* Custom cursor: the native pointer is only hidden once the replacement has
+   actually mounted, so a JS failure can never leave the page cursorless. */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: auto !important;
   }
 }

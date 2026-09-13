@@ -1,44 +1,54 @@
 import { contact, site } from "@/content/site";
 import { ArrowUpRightIcon, socialIcons, type SocialIconName } from "@/components/icons";
-import { Reveal } from "@/components/Reveal";
+import { Magnetic } from "@/components/ui/Magnetic";
+import { MaskLines, Rise, SplitChars } from "@/components/ui/SplitReveal";
 
 export function Contact() {
   return (
     <section
       id="contact"
       aria-labelledby="contact-title"
-      className="mx-auto w-full max-w-6xl scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28"
+      className="relative overflow-hidden bg-ink pb-24 pt-28 sm:pb-32 sm:pt-36"
     >
-      <Reveal>
-        <div className="overflow-hidden rounded-3xl border border-border bg-surface px-6 py-14 text-center sm:px-12 sm:py-20">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-            05 / Contact
-          </p>
-          <h2
-            id="contact-title"
-            className="mx-auto mt-4 max-w-2xl text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl"
-          >
-            {contact.heading}
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl leading-relaxed text-muted">{contact.body}</p>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[60vh]"
+        style={{
+          background:
+            "radial-gradient(60% 100% at 50% 100%, rgba(255,92,43,0.18) 0%, transparent 70%)",
+        }}
+      />
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+      <div className="shell relative">
+        <p className="eyebrow">{contact.eyebrow}</p>
+
+        <SplitChars
+          as="h2"
+          className="display-lg mt-6 max-w-4xl font-display font-semibold text-ivory"
+        >
+          {contact.heading}
+        </SplitChars>
+
+        <MaskLines className="mt-8 max-w-xl text-lg leading-relaxed text-ivory-dim">
+          {contact.body}
+        </MaskLines>
+
+        <Rise className="mt-12 flex flex-col gap-10">
+          <Magnetic strength={0.18} className="w-fit max-w-full">
             <a
               href={`mailto:${site.email}`}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-accent px-6 text-sm font-medium text-accent-contrast transition-opacity hover:opacity-90"
+              className="group inline-flex w-fit max-w-full items-center gap-4 border-b border-ink-hair pb-3 font-display text-[7vw] font-semibold leading-none tracking-tight text-ivory transition-colors hover:text-ember sm:text-[3.5vw]"
             >
-              {site.email}
-              <ArrowUpRightIcon width={16} height={16} />
+              <span className="truncate">{site.email}</span>
+              <ArrowUpRightIcon
+                width={28}
+                height={28}
+                className="shrink-0 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
+              />
             </a>
-            <a
-              href={site.resumeUrl}
-              className="inline-flex min-h-12 items-center rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:bg-surface-2"
-            >
-              Download resume
-            </a>
-          </div>
+          </Magnetic>
 
-          <ul className="mt-10 flex items-center justify-center gap-2">
+          <ul className="flex flex-wrap items-center gap-3">
             {site.socials.map((social) => {
               const Icon = socialIcons[social.icon as SocialIconName];
               const external = social.href.startsWith("http");
@@ -46,19 +56,19 @@ export function Contact() {
                 <li key={social.label}>
                   <a
                     href={social.href}
-                    aria-label={social.label}
                     target={external ? "_blank" : undefined}
                     rel={external ? "noreferrer noopener" : undefined}
-                    className="grid size-11 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent hover:text-accent"
+                    className="inline-flex min-h-12 items-center gap-3 rounded-full border border-ink-hair px-5 text-sm text-ivory-dim transition-colors hover:border-ember hover:text-ivory"
                   >
-                    <Icon />
+                    <Icon width={18} height={18} />
+                    {social.label}
                   </a>
                 </li>
               );
             })}
           </ul>
-        </div>
-      </Reveal>
+        </Rise>
+      </div>
     </section>
   );
 }

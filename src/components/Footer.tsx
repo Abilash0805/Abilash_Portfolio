@@ -1,13 +1,18 @@
 import { site } from "@/content/site";
+import { Marquee } from "@/components/ui/Marquee";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted sm:flex-row sm:px-8">
+    <footer className="relative overflow-hidden border-t border-ink-hair bg-ink">
+      <div className="py-10">
+        <Marquee items={site.roles} />
+      </div>
+
+      <div className="shell flex flex-col gap-3 border-t border-ink-hair py-8 text-sm text-ivory-faint sm:flex-row sm:items-center sm:justify-between">
         <p>
-          &copy; {new Date().getFullYear()} {site.name}. All rights reserved.
+          &copy; {new Date().getFullYear()} {site.name}
         </p>
-        <p className="font-mono text-xs">Built with Next.js, Framer Motion &amp; Lenis</p>
+        <p>{site.tagline}</p>
       </div>
     </footer>
   );

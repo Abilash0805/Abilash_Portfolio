@@ -1,28 +1,50 @@
 import { about } from "@/content/site";
-import { Reveal, RevealGroup, RevealItem } from "@/components/Reveal";
-import { Section } from "@/components/Section";
+import { MaskLines, Rise, SplitChars } from "@/components/ui/SplitReveal";
 
 export function About() {
   return (
-    <Section id="about" eyebrow="01 / About" title="A short version">
-      <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-20">
-        <Reveal className="space-y-6">
-          {about.paragraphs.map((paragraph) => (
-            <p key={paragraph} className="text-lg leading-relaxed text-muted">
-              {paragraph}
-            </p>
-          ))}
-        </Reveal>
+    <section
+      id="about"
+      aria-labelledby="about-title"
+      className="relative bg-ink py-28 sm:py-36"
+    >
+      <div className="shell">
+        <p className="eyebrow">{about.eyebrow}</p>
 
-        <RevealGroup className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border lg:grid-cols-1">
-          {about.stats.map((stat) => (
-            <RevealItem key={stat.label} className="bg-surface p-6">
-              <p className="font-mono text-3xl font-semibold text-accent">{stat.value}</p>
-              <p className="mt-2 text-sm text-muted">{stat.label}</p>
-            </RevealItem>
-          ))}
-        </RevealGroup>
+        <SplitChars
+          as="h2"
+          className="display-lg mt-6 max-w-4xl font-display font-semibold text-ivory"
+        >
+          {about.heading}
+        </SplitChars>
+
+        <div className="mt-14 grid gap-14 lg:grid-cols-[1.25fr_1fr] lg:gap-24">
+          <div className="space-y-6">
+            {about.paragraphs.map((paragraph) => (
+              <MaskLines
+                key={paragraph}
+                className="max-w-2xl text-lg leading-relaxed text-ivory-dim"
+              >
+                {paragraph}
+              </MaskLines>
+            ))}
+          </div>
+
+          <Rise className="hairline">
+            <dl>
+              {about.facts.map((fact) => (
+                <div
+                  key={fact.label}
+                  className="flex flex-col gap-1 border-b border-ink-hair py-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
+                >
+                  <dt className="eyebrow">{fact.label}</dt>
+                  <dd className="text-right text-ivory sm:max-w-[60%]">{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Rise>
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }
