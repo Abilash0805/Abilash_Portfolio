@@ -1,0 +1,19 @@
+# Netlify detects Next.js and installs its Next.js Runtime automatically --
+# Next.js 16 is supported with zero config, so the runtime is deliberately not
+# pinned here. What is pinned is the part autodetection does not guarantee:
+# the Node version the project is actually tested against.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Every route in this project prerenders at build time, so pages are served as
+# static HTML. Caching of /_next/static is handled by the Next.js Runtime.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
